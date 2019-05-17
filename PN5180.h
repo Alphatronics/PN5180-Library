@@ -19,7 +19,9 @@
 #ifndef PN5180_H
 #define PN5180_H
 
-#include <SPI.h>
+#if defined (DEVICE_SPI)
+
+#include "mbed.h"
 
 // PN5180 Registers
 #define SYSTEM_CONFIG       (0x00)
@@ -44,14 +46,14 @@
 #define IRQ_PIN_CONFIG      (0x1A)
 
 enum PN5180TransceiveStat {
-  PN5180_TS_Idle = 0,
-  PN5180_TS_WaitTransmit = 1,
-  PN5180_TS_Transmitting = 2,
-  PN5180_TS_WaitReceive = 3,
-  PN5180_TS_WaitForData = 4,
-  PN5180_TS_Receiving = 5,
-  PN5180_TS_LoopBack = 6,
-  PN5180_TS_RESERVED = 7
+    PN5180_TS_Idle = 0,
+    PN5180_TS_WaitTransmit = 1,
+    PN5180_TS_Transmitting = 2,
+    PN5180_TS_WaitReceive = 3,
+    PN5180_TS_WaitForData = 4,
+    PN5180_TS_Receiving = 5,
+    PN5180_TS_LoopBack = 6,
+    PN5180_TS_RESERVED = 7
 };
 
 // PN5180 IRQ_STATUS
@@ -64,69 +66,53 @@ enum PN5180TransceiveStat {
 #define TX_RFON_IRQ_STAT    (1<<9)  // RF Field ON in PCD IRQ
 #define RX_SOF_DET_IRQ_STAT (1<<14) // RF SOF Detection IRQ
 
-class PN5180 {
+class PN5180 
+{
+public:
+    PN5180(PinName mosi, PinName miso, PinName sck, PinName cs, PinName reset, PinName busy); 
+
+    void powerUp();
+    void powerDown();
+    void reset();
+
+    // cmd 0x00 
+    bool writeRegister(uint8_t reg, uint32_t value);
+    // cmd 0x01
+    bool writeRegisterWithOrMask(uint8_t addr, uint32_t mask);
+    // cmd 0x02
+    bool writeRegisterWithAndMask(uint8_t addr, uint32_t mask);
+    //cmd 0x04
+    bool readRegister(uint8_t reg, uint32_t *value);
+    //cmd 0x07
+    bool readEEprom(uint8_t addr, uint8_t *buffer, uint8_t len);
+    //cmd 0x09
+    bool sendData(uint8_t *data, uint8_t len, uint8_t validBits = 0);
+    //cmd 0x0a
+    uint8_t * readData(uint16_t len);
+    //cmd 0x11
+    bool loadRFConfig(uint8_t txConf, uint8_t rxConf);
+    //cmd 0x16
+    bool setRF_on();
+    //cmd 0x17
+    bool setRF_off();
+
+
+    uint32_t getIRQStatus();
+    bool clearIRQStatus(uint32_t irqMask);
+
+    PN5180TransceiveStat getTransceiveState();
+
 private:
-  uint8_t PN5180_NSS;   // active low
-  uint8_t PN5180_BUSY;
-  uint8_t PN5180_RST;
+    SPI _spi;
+    DigitalOut _cs;
+    DigitalOut _reset;
+    DigitalIn _busy;
 
-  SPISettings PN5180_SPI_SETTINGS;
+    uint8_t readBuffer[508];
 
-  uint8_t readBuffer[508];
-  
-public:
-  PN5180(uint8_t SSpin, uint8_t BUSYpin, uint8_t RSTpin);
-
-  void begin();
-  void end();
-
-  /*
-   * PN5180 direct commands with host interface
-   */
-public:
-  /* cmd 0x00 */
-  bool writeRegister(uint8_t reg, uint32_t value);
-  /* cmd 0x01 */
-  bool writeRegisterWithOrMask(uint8_t addr, uint32_t mask);
-  /* cmd 0x02 */
-  bool writeRegisterWithAndMask(uint8_t addr, uint32_t mask);
-
-  /* cmd 0x04 */
-  bool readRegister(uint8_t reg, uint32_t *value);
-
-  /* cmd 0x07 */
-  bool readEEprom(uint8_t addr, uint8_t *buffer, uint8_t len);
-
-  /* cmd 0x09 */
-  bool sendData(uint8_t *data, uint8_t len, uint8_t validBits = 0);
-  /* cmd 0x0a */
-  uint8_t * readData(uint16_t len);
-
-  /* cmd 0x11 */
-  bool loadRFConfig(uint8_t txConf, uint8_t rxConf);
-
-  /* cmd 0x16 */
-  bool setRF_on();
-  /* cmd 0x17 */
-  bool setRF_off();
-
-  /*
-   * Helper functions
-   */
-public:
-  void reset();
-
-  uint32_t getIRQStatus();
-  bool clearIRQStatus(uint32_t irqMask);
-  
-  PN5180TransceiveStat getTransceiveState();
-
-  /*
-   * Private methods, called within an SPI transaction
-   */
-private:
-  bool transceiveCommand(uint8_t *sendBuffer, size_t sendBufferLen, uint8_t *recvBuffer = 0, size_t recvBufferLen = 0);
-
+    bool transceiveCommand(uint8_t *sendBuffer, size_t sendBufferLen, uint8_t *recvBuffer = 0, size_t recvBufferLen = 0);
+    bool waitForBusyState(bool stateToWaitFor);
 };
 
-#endif /* PN5180_H */
+#endif // DEVICE_SPI
+#endif // PN5180_H
