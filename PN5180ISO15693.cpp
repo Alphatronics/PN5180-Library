@@ -36,7 +36,7 @@ PN5180ISO15693::PN5180ISO15693(PinName mosi, PinName miso, PinName sck, PinName 
 ISO15693ErrorCode PN5180ISO15693::getInventory(uint8_t *uid) 
 {
     //                     Flags,  CMD, maskLen
-    uint8_t inventory[] = { 0x26, 0x01, 0x00 };
+    uint8_t inventory[] = { 0x26, ISO15693_CMD_INVENTORY, 0x00 };
     //                        |\- inventory flag + high data rate
     //                        \-- 1 slot: only one card, no AFI field present
     tr_debug("Get Inventory...\n");
@@ -96,10 +96,9 @@ ISO15693ErrorCode PN5180ISO15693::getInventory(uint8_t *uid)
  */
 ISO15693ErrorCode PN5180ISO15693::readSingleBlock(uint8_t *uid, uint8_t blockNo, uint8_t *blockData, uint8_t blockSize) 
 {
-    //                            flags, cmd, uid,             blockNo
-    uint8_t readSingleBlock[] = { 0x22, 0x20, 1,2,3,4,5,6,7,8, blockNo }; // UID has LSB first!
-    //                              |\- high data rate
-    //                              \-- no options, addressed by UID
+    //                            flags,                                  cmd,                          uid,             blockNo
+    uint8_t readSingleBlock[] = { ISO15693_CF_SINGLESUBCARRIER_ADDRESSED, ISO15693_CMD_READSINGLEBLOCK, 1,2,3,4,5,6,7,8, blockNo }; // UID has LSB first!
+    //set uid
     for (int i=0; i<8; i++) {
         readSingleBlock[2+i] = uid[i];
     }
@@ -121,7 +120,10 @@ ISO15693ErrorCode PN5180ISO15693::readSingleBlock(uint8_t *uid, uint8_t blockNo,
     tr_debug("Value=");
     
     for (int i=0; i<blockSize; i++) {
-        blockData[i] = resultPtr[2+i];   
+        if(readSingleBlock[0] == ISO15693_CF_SINGLESUBCARRIER_ADDRESSED_WITHOPTIONS || readSingleBlock[0] == ISO15693_CF_SINGLESUBCARRIER_UNADDRESSED_WITHOPTIONS)
+            blockData[i] = resultPtr[2+i];
+        else //no options
+            blockData[i] = resultPtr[1+i];
         tr_debug("%s ", formatHex(blockData[i]));  
     }
 
@@ -170,10 +172,8 @@ ISO15693ErrorCode PN5180ISO15693::readSingleBlock(uint8_t *uid, uint8_t blockNo,
  */
 ISO15693ErrorCode PN5180ISO15693::writeSingleBlock(uint8_t *uid, uint8_t blockNo, uint8_t *blockData, uint8_t blockSize) 
 {
-    //                            flags, cmd, uid,             blockNo
-    uint8_t writeSingleBlock[] = { 0x22, 0x21, 1,2,3,4,5,6,7,8, blockNo }; // UID has LSB first!
-    //                               |\- high data rate
-    //                               \-- no options, addressed by UID
+    //                            flags,                                   cmd,                           uid,             blockNo
+    uint8_t writeSingleBlock[] = { ISO15693_CF_SINGLESUBCARRIER_ADDRESSED, ISO15693_CMD_WRITESINGLEBLOCK, 1,2,3,4,5,6,7,8, blockNo }; // UID has LSB first!
 
     uint8_t writeCmdSize = sizeof(writeSingleBlock) + blockSize;
     uint8_t *writeCmd = (uint8_t*)malloc(writeCmdSize);
@@ -255,7 +255,7 @@ ISO15693ErrorCode PN5180ISO15693::writeSingleBlock(uint8_t *uid, uint8_t blockNo
  */
 ISO15693ErrorCode PN5180ISO15693::getSystemInfo(uint8_t *uid, uint8_t *blockSize, uint8_t *numBlocks) 
 {
-    uint8_t sysInfo[] = { 0x22, 0x2b, 1,2,3,4,5,6,7,8 };  // UID has LSB first!
+    uint8_t sysInfo[] = { ISO15693_CF_SINGLESUBCARRIER_ADDRESSED, ISO15693_CMD_GETSYSTEMINFO, 1,2,3,4,5,6,7,8 };  // UID has LSB first!
     for (int i=0; i<8; i++) {
         sysInfo[2+i] = uid[i];
     }
@@ -466,7 +466,7 @@ ISO15693ErrorCode PN5180ISO15693::issueISO15693Command(uint8_t *cmd, uint8_t cmd
 bool PN5180ISO15693::setupRF() 
 {
     tr_debug("Loading RF-Configuration...\n");
-    if (loadRFConfig(0x0d, 0x8d)) {  // ISO15693 parameters
+    if (loadRFConfig(PN5180_RF_TX_CFG_ISO15693_ASK100_26KBIT, PN5180_RF_RX_CFG_ISO15693_ASK100_26KBIT)) {  // ISO15693 parameters
         tr_debug("done.\n");
     }
     else return false;
