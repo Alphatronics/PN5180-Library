@@ -81,8 +81,8 @@ ISO15693ErrorCode PN5180ISO15693::getInventory(uint8_t *uid)
   *
   *  If Error flag is set, the following error codes are defined:
   *    01 = The command is not supported, i.e. the request code is not recognized.
-  *    02 = The command is not recognized, i.e. a format error occured.
-  *    03 = The option is not suppored.
+  *    02 = The command is not recognized, i.e. a format error occurred.
+  *    03 = The option is not supported.
   *    0F = Unknown error.
   *    10 = The specific block is not available.
   *    11 = The specific block is already locked and cannot be locked again.
@@ -155,8 +155,8 @@ ISO15693ErrorCode PN5180ISO15693::readSingleBlock(uint8_t *uid, uint8_t blockNo,
   *
   *  If Error flag is set, the following error codes are defined:
   *    01 = The command is not supported, i.e. the request code is not recognized.
-  *    02 = The command is not recognized, i.e. a format error occured.
-  *    03 = The option is not suppored.
+  *    02 = The command is not recognized, i.e. a format error occurred.
+  *    03 = The option is not supported.
   *    0F = Unknown error.
   *    10 = The specific block is not available.
   *    11 = The specific block is already locked and cannot be locked again.
@@ -222,8 +222,8 @@ ISO15693ErrorCode PN5180ISO15693::writeSingleBlock(uint8_t *uid, uint8_t blockNo
   *
   *  If Error flag is set, the following error codes are defined:
   *    01 = The command is not supported, i.e. the request code is not recognized.
-  *    02 = The command is not recognized, i.e. a format error occured.
-  *    03 = The option is not suppored.
+  *    02 = The command is not recognized, i.e. a format error occurred.
+  *    03 = The option is not supported.
   *    0F = Unknown error.
   *    10 = The specific block is not available.
   *    11 = The specific block is already locked and cannot be locked again.
@@ -389,8 +389,8 @@ ISO15693ErrorCode PN5180ISO15693::getSystemInfo(uint8_t *uid, uint8_t *blockSize
  *
  *  If Error flag is set, the following error codes are defined:
  *    01 = The command is not supported, i.e. the request code is not recognized.
- *    02 = The command is not recognized, i.e. a format error occured.
- *    03 = The option is not suppored.
+ *    02 = The command is not recognized, i.e. a format error occurred.
+ *    03 = The option is not supported.
  *    0F = Unknown error.
  *    10 = The specific block is not available.
  *    11 = The specific block is already locked and cannot be locked again.
@@ -491,7 +491,7 @@ const char* PN5180ISO15693::errorToString(int err)
         case ISO15693_EC_OK: return "OK!";
         case ISO15693_EC_NOT_SUPPORTED: return "Command is not supported!";
         case ISO15693_EC_NOT_RECOGNIZED: return "Command is not recognized!";
-        case ISO15693_EC_OPTION_NOT_SUPPORTED: return "Option is not suppored!";
+        case ISO15693_EC_OPTION_NOT_SUPPORTED: return "Option is not supported!";
         case ISO15693_EC_UNKNOWN_ERROR: return "Unknown error!";
         case ISO15693_EC_BLOCK_NOT_AVAILABLE: return "Specified block is not available!";
         case ISO15693_EC_BLOCK_ALREADY_LOCKED: return "Specified block is already locked!";
