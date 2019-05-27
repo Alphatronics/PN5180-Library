@@ -1,0 +1,21 @@
+{
+    "name": "pn5180",
+    "config": {
+        "SPI_CS": "NC",
+        "SPI_MOSI": "NC",
+        "SPI_MISO": "NC",
+        "SPI_CLK": "NC",
+        "RESET": "NC",
+        "BUSY": "NC"
+    },
+    "target_overrides": {
+        "NUCLEO_F429ZI": {
+            "SPI_MOSI": "PE_14",
+            "SPI_MISO": "PE_13",
+            "SPI_CLK":  "PE_12",
+            "SPI_CS":   "PE_11",
+            "RESET": "PE_15",
+            "BUSY": "PE_10"
+        }
+    }
+}

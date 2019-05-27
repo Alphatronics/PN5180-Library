@@ -1,4 +1,4 @@
-// NAME: Debug.h
+// NAME: PN5180_trace.h
 //
 // DESC: Helper methods for debugging
 //
@@ -16,19 +16,23 @@
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU
 // Lesser General Public License for more details.
 //
-#ifndef DEBUG_H
-#define DEBUG_H
+#ifndef PN5180_TRACE_H
+#define PN5180_TRACE_H
 
-#ifdef DEBUG
-#define PN5180DEBUG(msg) Serial.print(msg)
-#else
-#define PN5180DEBUG(msg)
+#include "mbed_trace.h"
+
+#ifndef MBED_CONF_MBED_TRACE_ENABLE
+#define MBED_CONF_MBED_TRACE_ENABLE 0
 #endif
-
-#ifdef DEBUG
+#if MBED_CONF_MBED_TRACE_ENABLE == 1
+#define TRACE_GROUP     "PN5180"
+#define DEBUG_PN5180    1
 extern char * formatHex(const uint8_t val);
 extern char * formatHex(const uint16_t val);
 extern char * formatHex(const uint32_t val);
-#endif
 
-#endif /* DEBUG_H */
+#else
+#define DEBUG_PN5180    0
+#endif //MBED_CONF_MBED_TRACE_ENABLE
+
+#endif // PN5180_TRACE_H
